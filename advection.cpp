@@ -15,7 +15,7 @@ dV_PH1_PH1, dV_MH1_PH1, dV_MH1_MH1, dV_PH1_MH1
 template<typename T>
 void advection(Grid_N_C_2D<T> &grid){
     
-
+        double a,b;
         for(int i = 0 + grid.noghost ; i < grid.n_x_node - (grid.noghost);i++){
         for(int j = 0 + grid.noghost ; j < grid.n_y_node - (grid.noghost); j++){ 
             
@@ -26,11 +26,11 @@ void advection(Grid_N_C_2D<T> &grid){
             grid.Cell(i,j,dV_M1_ZERO) = grid.Cell(i+1,j  , dV_M1_ZERO );
 
             ///half velocities
-            std::cout<<grid.Node(i,j,dV_MH1_MH1)<<"before "<<i<<j <<std::endl;
+            //std::cout<<grid.Node(i,j,dV_MH1_MH1)<<"before "<<i<<j <<std::endl;
+            a = grid.Cell(i,j,dV_MH1_PH1);
             grid.Node(i,j,dV_MH1_MH1) = grid.Cell(i  ,j  , dV_MH1_MH1);
-            grid.Node(i,j,dV_MH1_PH1) = grid.Cell(i  ,j-1, dV_MH1_PH1);
-            
-            grid.Cell(i,j,dV_MH1_MH1) = grid.Node(i+1,j+1, dV_MH1_MH1);
+            grid.Node(i,j,dV_MH1_PH1) = a;            
+            grid.Cell(i,j,dV_MH1_MH1) = grid.Node(i+1,j+1, dV_MH1_MH1);                        
             grid.Cell(i,j,dV_MH1_PH1) = grid.Node(i+1,j  , dV_MH1_PH1);
 
             //3 velocities
@@ -40,7 +40,7 @@ void advection(Grid_N_C_2D<T> &grid){
 
             grid.Cell(i,j,dV_ZERO_M3) = grid.Cell(i  ,j+3, dV_ZERO_M3);
             grid.Cell(i,j,dV_M3_ZERO) = grid.Cell(i+3,j  , dV_M3_ZERO);
-            std::cout<<grid.Node(i,j,dV_MH1_MH1) <<" "<<i<<j<<std::endl;
+            //std::cout<<grid.Node(i,j,dV_MH1_MH1) <<" "<<i<<j<<std::endl;
         } 
     }
 
@@ -56,12 +56,20 @@ void advection(Grid_N_C_2D<T> &grid){
             grid.Cell(i,j,dV_P1_ZERO) = grid.Cell(i-1,j  , dV_P1_ZERO );
       
             ///half velocities
+           // std::cout<<grid.Node(i,j,dV_PH1_PH1)<<"before "<<i<<j <<std::endl;
+
+
+            grid.Cell(i,j,dV_PH1_MH1) = b;
+            grid.Cell(i,j,dV_PH1_PH1) = grid.Node(i  ,j  , dV_PH1_PH1);
+            b=grid.Node(i,j,dV_PH1_MH1);
+
             grid.Node(i,j,dV_PH1_MH1) = grid.Cell(i-1,j  , dV_PH1_MH1);
+            
             grid.Node(i,j,dV_PH1_PH1) = grid.Cell(i-1,j-1, dV_PH1_PH1);
 
 
-            grid.Cell(i,j,dV_PH1_MH1) = grid.Node(i  ,j+1, dV_PH1_MH1);
-            grid.Cell(i,j,dV_PH1_PH1) = grid.Node(i  ,j  , dV_PH1_PH1);
+            
+            //std::cout<<grid.Cell(i,j,dV_PH1_PH1) <<" "<<i<<j<<std::endl;
 
             //SC3
             grid.Node(i,j, dV_ZERO_P3) = grid.Node(i  ,j-3, dV_ZERO_P3);
@@ -185,27 +193,38 @@ void periodic(Grid_N_C_2D<T> &grid){
 
 int main (){
 
-    Grid_N_C_2D<double> grid1(5,5,3,13);
+    Grid_N_C_2D<double> grid1(4,4,3,13);
     ///Initialize
     for (int i =0; i<grid1.n_x_node;i++){
         for( int j = 0; j< grid1.n_x_node; j++){
             for(int dv = 0; dv<13; dv++){
                 grid1.Node(i,j,dv) = 1.1;
-                grid1.Cell(i,j,dv) = 1.2;
+                grid1.Cell(i,j,dv) = 1.1;
 
             }
         }
     }
 
-// for (int i =0; i<grid1.n_x_node;i++){
-//         for( int j = 0; j< grid1.n_x_node; j++){
-//             for(int dv = 0; dv<13; dv++){
-//                 std::cout<<grid1.Node(i,j,dv)<<" Node "<<dv<<std::endl;
-//                 std::cout<<grid1.Cell(i,j,dv)<<"cell  "<<dv<<std::endl;
 
-//             }
-//         }
-//     }
+grid1.Node(5,5,dV_PH1_MH1)=1.5;
+std::cout<<grid1.n_x_cell<<std::endl;
+for(int i= 0;i<1;i++){
+    advection(grid1);
+   // periodic(grid1);
+
+    
+}
+//std::cout<<grid1.Cell(4,5,dV_PH1_PH1)<<std::endl;
+for (int i =0; i<grid1.n_x_node;i++){
+        for( int j = 0; j< grid1.n_x_node; j++){
+            for(int dv = 0; dv<13; dv++){
+                if(grid1.Node(i,j,dv) ==1.5 || grid1.Cell(i,j,dv) == 1.5){
+                std::cout<<grid1.Node(i,j,dv)<<" Node "<<i<<" "<<j<<" "<<dv<<std::endl;
+                std::cout<<grid1.Cell(i,j,dv)<<"cell  "<<i<<" "<<j<<" "<<dv<<std::endl;
+                }
+            }
+        }
+    }
 
 
 
