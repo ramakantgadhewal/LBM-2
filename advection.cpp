@@ -17,6 +17,7 @@ void advection(Grid_N_C_2D<T> &grid){
     
         double a,b;
         for(int i = 0 + grid.noghost ; i < grid.n_x_node - (grid.noghost);i++){
+            a = grid.Cell(i,grid.n_y_node - (grid.noghost)-1,dV_MH1_PH1);
         for(int j = 0 + grid.noghost ; j < grid.n_y_node - (grid.noghost); j++){ 
             
             grid.Node(i,j,dV_ZERO_M1) = grid.Node(i  ,j+1, dV_ZERO_M1 ); //for SC1 -Node
@@ -27,9 +28,11 @@ void advection(Grid_N_C_2D<T> &grid){
 
             ///half velocities
             //std::cout<<grid.Node(i,j,dV_MH1_MH1)<<"before "<<i<<j <<std::endl;
-            a = grid.Cell(i,j,dV_MH1_PH1);
+            
             grid.Node(i,j,dV_MH1_MH1) = grid.Cell(i  ,j  , dV_MH1_MH1);
-            grid.Node(i,j,dV_MH1_PH1) = a;            
+            grid.Node(i,j,dV_MH1_PH1) = a;     
+            a = grid.Cell(i,j,dV_MH1_PH1);       
+
             grid.Cell(i,j,dV_MH1_MH1) = grid.Node(i+1,j+1, dV_MH1_MH1);                        
             grid.Cell(i,j,dV_MH1_PH1) = grid.Node(i+1,j  , dV_MH1_PH1);
 
@@ -45,6 +48,7 @@ void advection(Grid_N_C_2D<T> &grid){
     }
 
         for(int i = grid.n_x_node - (grid.noghost +1); i> grid.noghost-1; i--){
+            b = grid.Node(i,grid.noghost,dV_PH1_MH1);
         for(int j = grid.n_y_node - (grid.noghost +1); j> grid.noghost-1; j--){
 
             //SC1
@@ -134,7 +138,7 @@ void periodic(Grid_N_C_2D<T> &grid){
 
     //--------------------------------------------------left right-----------------------------------------------//
 
-    for(int j =0; grid.n_y_node;j++){
+    for(int j =0; j<grid.n_y_node;j++){
         //--------right to left-------//
         grid.Node(grid.noghost -1,j,dV_P1_ZERO) = grid.Node( grid.n_y_node - (grid.noghost +1),j,dV_P1_ZERO); ///copying to first adjacent ghost node from last node physical domain
         grid.Cell(grid.noghost -1,j,dV_P1_ZERO) = grid.Cell( grid.n_y_node - (grid.noghost +1),j,dV_P1_ZERO);
@@ -206,21 +210,37 @@ int main (){
     }
 
 
-grid1.Node(5,5,dV_PH1_MH1)=1.5;
-std::cout<<grid1.n_x_cell<<std::endl;
-for(int i= 0;i<1;i++){
-    advection(grid1);
-   // periodic(grid1);
+grid1.Node(3,6,dV_MH1_MH1)=1.5;
 
+std::cout<<grid1.n_x_cell<<std::endl; 
+for(int i= 0;i<2;i++){
     
-}
-//std::cout<<grid1.Cell(4,5,dV_PH1_PH1)<<std::endl;
+    periodic(grid1);  
 for (int i =0; i<grid1.n_x_node;i++){
         for( int j = 0; j< grid1.n_x_node; j++){
             for(int dv = 0; dv<13; dv++){
-                if(grid1.Node(i,j,dv) ==1.5 || grid1.Cell(i,j,dv) == 1.5){
-                std::cout<<grid1.Node(i,j,dv)<<" Node "<<i<<" "<<j<<" "<<dv<<std::endl;
-                std::cout<<grid1.Cell(i,j,dv)<<"cell  "<<i<<" "<<j<<" "<<dv<<std::endl;
+                if(grid1.Node(i,j,dv) ==1.5 || grid1.Cell(i,j,dv) == 1.5 ){
+                std::cout<<grid1.Node(i,j,dv)<<" Node "<<i<<" "<<j<<" "<<grid1.Cell(i,j,dv)<<"cell  "<<i<<" "<<j<<" "<<dv<<std::endl;
+                
+               
+                }
+            }
+        }
+    }
+
+    
+
+    advection(grid1);
+}
+
+std::cout<<"after"<<std::endl;
+for (int i =0; i<grid1.n_x_node;i++){
+        for( int j = 0; j< grid1.n_x_node; j++){
+           for(int dv = 0; dv<13; dv++){
+                if(grid1.Node(i,j,dv) ==1.5 || grid1.Cell(i,j,dv) == 1.5 ){
+                std::cout<<grid1.Node(i,j,dv)<<" Node "<<i<<" "<<j<<" "<<grid1.Cell(i,j,dv)<<"cell  "<<i<<" "<<j<<" "<<dv<<std::endl;
+                
+               
                 }
             }
         }
